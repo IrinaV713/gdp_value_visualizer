@@ -1,4 +1,3 @@
-let qq;
 function getArrayFromTable(q){
 	let myArr = [];
 	
@@ -34,7 +33,5 @@ function getArrayFromTable(q){
 		k++;
 	}
 	myArr['count'] = k;
-
-	qq = myArr;
 	return myArr;
 }
