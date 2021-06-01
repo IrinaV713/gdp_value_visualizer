@@ -3,10 +3,23 @@ let PADDING_Y = 20;
 let MAXWIDTH = screen.width * 0.8;
 let MAXHEIGHT = screen.height * 0.6;
 
+// awainting to load data
+document.addEventListener('DOMContentLoaded', function () {
+	promise.then(
+		result => {
+			output(result);
+		},
+		error => {
+			alert(error);
+		}
+	);
+});
+
+// load information to drop-down list of countries
 function output() {
 	let countriesSelect = document.getElementById("countries"), op = '';
 	for (let key in arrData) {
-		op += '<option value="'+key+'">' + key + '</option>';
+		op += '<option value="'+key+'">' + key + '</option>'; 
 	}
 	countriesSelect.innerHTML = op;
 	
@@ -43,19 +56,19 @@ function drawPoint(ctx, centerX, centerY, radius, color){
 	ctx.fill();
 }
 
+// draw coordinate grig and chart points
 function getCoordGrid(ctx, startX, startY){
 	drawLine(ctx, startX + MARGIN, startY - MARGIN, MAXWIDTH - MARGIN, startY - MARGIN, 2, "#4040a1");
 	drawLine(ctx, startX + MARGIN, startY - MARGIN, startX + MARGIN, MARGIN, 2, "#4040a1");
-	// look for max Y value
 	
-	console.log('myArr in getCoordGrid', myArr);
+	// look for max Y value
 	let mv = 0;
 	for (let i=0; i<myArr.length; i++) {
 		if (mv < 1*myArr[i][1]) mv = 1*myArr[i][1];
 	}
 	
-	let kol = 5;
-	let deltaY = Math.round((mv/kol)/1000) * 1000;	
+	let kolY = 5;
+	let deltaY = Math.round((mv/kolY)/1000) * 1000;	
 	let scaled_deltaY = (MAXHEIGHT - 2*MARGIN)*deltaY/mv; //?
 	scaled_deltaY = Math.floor(scaled_deltaY);
 	
@@ -67,9 +80,9 @@ function getCoordGrid(ctx, startX, startY){
 		ctx.fillText(i*deltaY+"", startX + MARGIN-40, startY - MARGIN - i*scaled_deltaY + 3);
 	}
 	
+	// draw X grid
 	let kolX = myArr.length+1;
 	let deltaX = (MAXWIDTH - 2*MARGIN - startX)/kolX;
-	// draw X grid
 	for (let i=0; i<myArr.length; i++) {
 		myArr[i][2] = startX + MARGIN + (i+1)*deltaX;
 		drawLine(ctx, myArr[i][2], startY - MARGIN, myArr[i][2], startY-MARGIN+5, 3, "#4040a1");
@@ -80,12 +93,10 @@ function getCoordGrid(ctx, startX, startY){
 	for (let i=0; i<myArr.length; i++){
 		drawPoint(ctx, startX + MARGIN + (i+1)*deltaX, startY - MARGIN - myArr[i][1] * osYlength/mv, 3, "#0000ff");
 	}
-	
-	
 }
 
+// transform array data to screen coordinates to display label with exact data near chart point
 function getArrCoords(x, y) {
-	// transform x, y to myArr data
 	let minDist = 1000, pos = 0;
 	for (let i=0; i<myArr.length; i++) {
 		let d = Math.abs(myArr[i][2]-x);
@@ -94,10 +105,9 @@ function getArrCoords(x, y) {
 			pos = i;
 		}
 	}
-	
 	return pos;
 }
-
+// creating canvas to display chart
 function drawChart() {
 	var myCanvas = document.getElementById("chart");
 	myCanvas.width = MAXWIDTH;
@@ -117,16 +127,4 @@ function drawChart() {
 		popup.style.top = e.screenY + "px";
 		popup.style.display = "block";
 	});
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-	promise.then(
-		result => {
-			output(result);
-		},
-		error => {
-			alert(error);
-		}
-	);
-});
-	
+}	
