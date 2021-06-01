@@ -1,7 +1,7 @@
 const https = require('https');
 
 let promise = new Promise((resolve, reject) => {
-
+  // get response from website
   https.get('https://w3.unece.org/PXWeb/en/Table?IndicatorCode=12', (response) => {
 	  let data = '';
 
@@ -17,10 +17,10 @@ let promise = new Promise((resolve, reject) => {
 			document.body.append(q);
 		}
 		
-		let regexpTable = /class="sortable".*?<\/table>/s;
+		let regexpTable = /class="sortable".*?<\/table>/s; // extract table
 		let match = regexpTable.exec(data);
 		
-		arrData = getArrayFromTable(match);
+		arrData = getArrayFromTable(match);  // parse table to array
 		resolve();
 	  });
 
