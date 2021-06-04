@@ -8,7 +8,7 @@ body{
 #idTitle{
 	display:block; 
 	width:50%; 
-	margin:0 auto;
+	margin:10px auto;
 	text-align:center;
 	color: #4040a1;
 	font-family: "Times New Roman", Times, serif;
@@ -21,6 +21,16 @@ body{
 	margin:20px auto 10px;
 	text-align:center;
 	}
+#choice{
+	display:block; 
+	width:50%; 
+	margin:0 auto;
+	text-align:center;
+	color: #4040a1;
+	font-family: "Times New Roman", Times, serif;
+	font-style: normal;
+	font-size: 15px;
+	}
 #countries{
 	background-color: transparent;
 	border-radius: 5px;
@@ -31,7 +41,8 @@ body{
 	text-align:center;
 	}
 canvas{
-	<--border:1px solid gray;-->
+	border:1px solid gray;
+	border-radius: 10px;
 	}
 #popup{
 	display:block;
