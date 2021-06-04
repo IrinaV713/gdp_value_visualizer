@@ -1,5 +1,5 @@
 function getArrayFromTable(q){
-	let myArr = [];
+	let arr_table = [];
 	
 	var regexpYears = /class="time-series-table-heading">(.*?)<\/td>/g; 
 	var matchYears;
@@ -25,13 +25,13 @@ function getArrayFromTable(q){
 		
 		let i = 0;
 		while (matchValue = regexpValue.exec(currentString)){
-			if (myArr[country[1]] == undefined) myArr[country[1]] = [];
-			myArr[country[1]].push([arr_years[i], matchValue[1]]);
+			if (arr_table[country[1]] == undefined) arr_table[country[1]] = [];
+			arr_table[country[1]].push([arr_years[i], matchValue[1]]);
 			i++;
 		}
-		
 		k++;
 	}
-	myArr['count'] = k;
-	return myArr;
+	arr_table['count'] = k;
+
+	return arr_table;
 }
