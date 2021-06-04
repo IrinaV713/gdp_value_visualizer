@@ -2,12 +2,14 @@ let MARGIN = 60;
 let PADDING_Y = 20;
 let MAXWIDTH = screen.width * 0.8;
 let MAXHEIGHT = screen.height * 0.6;
+let point_radius = 4;
+let axis_width = 3;
+let grid_width = 0.5;
 
-// awainting to load data
 document.addEventListener('DOMContentLoaded', function () {
 	promise.then(
 		result => {
-			output(result);
+			outputToList(result);
 		},
 		error => {
 			alert(error);
@@ -15,11 +17,10 @@ document.addEventListener('DOMContentLoaded', function () {
 	);
 });
 
-// load information to drop-down list of countries
-function output() {
+function outputToList() {
 	let countriesSelect = document.getElementById("countries"), op = '';
-	for (let key in arrData) {
-		op += '<option value="'+key+'">' + key + '</option>'; 
+	for (let key in arrayTable) {
+		op += '<option value="'+key+'">' + key + '</option>';
 	}
 	countriesSelect.innerHTML = op;
 	
@@ -30,12 +31,33 @@ function output() {
 		let popup = document.getElementById("popup");
 		popup.style.display = "none";
 		
-		myArr = arrData[combo.value];
+		countryData = arrayTable[combo.value];
 		let val = combo.value;
 		drawChart();
 	}
 	
 	combo.onchange();
+}
+
+function drawChart() {
+	var myCanvas = document.getElementById("chart");
+	myCanvas.width = MAXWIDTH;
+	myCanvas.height = MAXHEIGHT;
+	var ctx = myCanvas.getContext("2d");
+
+	let beginX = 0;
+	let beginY = MAXHEIGHT;
+	getCoordGrid(ctx, beginX, beginY);
+	
+	myCanvas.addEventListener('mousedown', function(e) {
+		console.log('mousedown', e);
+		let num = getArrCoords(e.layerX, e.layerY);
+		let popup = document.getElementById("popup");
+		popup.innerHTML = "For " + countryData[num][0] + " year - " + countryData[num][1] + " $";
+		popup.style.left = e.screenX + "px";
+		popup.style.top = e.screenY + "px";
+		popup.style.display = "block";
+	});
 }
 
 function drawLine(ctx, startX, startY, endX, endY, width, color){
@@ -56,50 +78,51 @@ function drawPoint(ctx, centerX, centerY, radius, color){
 	ctx.fill();
 }
 
-// draw coordinate grig and chart points
 function getCoordGrid(ctx, startX, startY){
-	drawLine(ctx, startX + MARGIN, startY - MARGIN, MAXWIDTH - MARGIN, startY - MARGIN, 2, "#4040a1");
-	drawLine(ctx, startX + MARGIN, startY - MARGIN, startX + MARGIN, MARGIN, 2, "#4040a1");
+	// draw axes
+	drawLine(ctx, startX + MARGIN, startY - MARGIN, MAXWIDTH - MARGIN, startY - MARGIN, axis_width, "#4040a1");
+	drawLine(ctx, startX + MARGIN, startY - MARGIN, startX + MARGIN, MARGIN, axis_width, "#4040a1");
 	
-	// look for max Y value
+	// look for max data value
 	let mv = 0;
-	for (let i=0; i<myArr.length; i++) {
-		if (mv < 1*myArr[i][1]) mv = 1*myArr[i][1];
+	for (let i=0; i < countryData.length; i++) {
+		if (mv < 1*countryData[i][1]) mv = 1*countryData[i][1];
 	}
 	
-	let kolY = 5;
-	let deltaY = Math.round((mv/kolY)/1000) * 1000;	
-	let scaled_deltaY = (MAXHEIGHT - 2*MARGIN)*deltaY/mv; //?
-	scaled_deltaY = Math.floor(scaled_deltaY);
-	
 	// draw  Y grid
-	for (let i=1; i<kol; i++) {
-		drawLine(ctx, startX + MARGIN, startY - MARGIN - i*scaled_deltaY, MAXWIDTH - MARGIN, startY - MARGIN - i*scaled_deltaY, 0.5,"#4040a1");
-		drawLine(ctx, startX + MARGIN, startY - MARGIN - i*scaled_deltaY, startX + MARGIN-8, startY - MARGIN - i*scaled_deltaY, 3, "#4040a1");
-		console.log('osY', startY - MARGIN - i*scaled_deltaY);
+	let kol = 5;
+	let deltaY = Math.round((mv/kol)/1000) * 1000;	
+	let scaled_deltaY = (MAXHEIGHT - 2*MARGIN)*deltaY/mv; 
+	scaled_deltaY = Math.floor(scaled_deltaY);
+	for (let i=1; i < kol; i++) {
+		drawLine(ctx, startX + MARGIN, startY - MARGIN - i*scaled_deltaY, MAXWIDTH - MARGIN, startY - MARGIN - i*scaled_deltaY, grid_width,"#4040a1");
+		drawLine(ctx, startX + MARGIN, startY - MARGIN - i*scaled_deltaY, startX + MARGIN-8, startY - MARGIN - i*scaled_deltaY, axis_width, "#4040a1");
 		ctx.fillText(i*deltaY+"", startX + MARGIN-40, startY - MARGIN - i*scaled_deltaY + 3);
 	}
 	
 	// draw X grid
-	let kolX = myArr.length+1;
+	let kolX = countryData.length + 1;
 	let deltaX = (MAXWIDTH - 2*MARGIN - startX)/kolX;
-	for (let i=0; i<myArr.length; i++) {
-		myArr[i][2] = startX + MARGIN + (i+1)*deltaX;
-		drawLine(ctx, myArr[i][2], startY - MARGIN, myArr[i][2], startY-MARGIN+5, 3, "#4040a1");
-		ctx.fillText(myArr[i][0]+"", startX + MARGIN + (i+1)*deltaX, startY - MARGIN + 20);
+	for (let i=0; i < countryData.length; i++) {
+		countryData[i][2] = startX + MARGIN + (i+1)*deltaX;
+		drawLine(ctx, countryData[i][2], startY - MARGIN, countryData[i][2], startY-MARGIN+5, axis_width, "#4040a1");
+		ctx.fillText(countryData[i][0]+"", startX + MARGIN + (i+1)*deltaX, startY - MARGIN + 20);
 	}
-	// draw points
-	let osYlength = startY - 2*MARGIN;
-	for (let i=0; i<myArr.length; i++){
-		drawPoint(ctx, startX + MARGIN + (i+1)*deltaX, startY - MARGIN - myArr[i][1] * osYlength/mv, 3, "#0000ff");
+	
+	// draw chart
+	let ylength = startY - 2 * MARGIN;
+	for (let i=0; i < countryData.length; i++){
+		if(i > 0){
+			drawLine(ctx, startX + MARGIN + (i+1)*deltaX, startY - MARGIN - countryData[i][1] * ylength/mv, startX + MARGIN + (i)*deltaX, startY - MARGIN - countryData[i-1][1] * ylength/mv, axis_width-1, "#4040a1");
+		}
+		drawPoint(ctx, startX + MARGIN + (i+1)*deltaX, startY - MARGIN - countryData[i][1] * ylength/mv, point_radius, "#0000ff");
 	}
 }
 
-// transform array data to screen coordinates to display label with exact data near chart point
 function getArrCoords(x, y) {
 	let minDist = 1000, pos = 0;
-	for (let i=0; i<myArr.length; i++) {
-		let d = Math.abs(myArr[i][2]-x);
+	for (let i=0; i < countryData.length; i++) {
+		let d = Math.abs(countryData[i][2]-x);
 		if (d < minDist) {
 			minDist = d;
 			pos = i;
@@ -107,24 +130,3 @@ function getArrCoords(x, y) {
 	}
 	return pos;
 }
-// creating canvas to display chart
-function drawChart() {
-	var myCanvas = document.getElementById("chart");
-	myCanvas.width = MAXWIDTH;
-	myCanvas.height = MAXHEIGHT;
-	var ctx = myCanvas.getContext("2d");
-
-	let beginX = 0;
-	let beginY = MAXHEIGHT;
-	getCoordGrid(ctx, beginX, beginY);
-	
-	myCanvas.addEventListener('mousedown', function(e) {
-		console.log('mousedown', e);
-		let num = getArrCoords(e.layerX, e.layerY);
-		let popup = document.getElementById("popup");
-		popup.innerHTML = "For " + myArr[num][0] + " year - " + myArr[num][1];
-		popup.style.left = e.screenX + "px";
-		popup.style.top = e.screenY + "px";
-		popup.style.display = "block";
-	});
-}	
