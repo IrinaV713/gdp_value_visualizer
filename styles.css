@@ -2,9 +2,11 @@
   padding: 0;
   margin: 0;
 }
+
 body {
   background-color: white;
 }
+
 #idTitle {
   display: block;
   width: 50%;
@@ -15,13 +17,15 @@ body {
   font-style: normal;
   font-size: 30px;
 }
+
 #selectArea {
   display: block;
   width: 80%;
   margin: 20px auto 10px;
   text-align: center;
 }
-#choice {
+
+.choice {
   display: block;
   width: 50%;
   margin: 0 auto;
@@ -31,19 +35,23 @@ body {
   font-style: normal;
   font-size: 15px;
 }
+
 #countries {
   background-color: transparent;
   border-radius: 5px;
   border-color: #4040a1;
   border-width: 3px;
 }
+
 .chartArea {
   text-align: center;
 }
+
 canvas {
   border: 1px solid gray;
   border-radius: 10px;
 }
+
 #popup {
   display: block;
   border: 1px solid #4040a1;
@@ -53,3 +61,4 @@ canvas {
   position: absolute;
   background-color: #deeaee;
 }
+
