@@ -18,8 +18,8 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function outputToList() {
-  let countriesSelect = document.getElementById("countries"),
-    op = "";
+  const countriesSelect = document.getElementById("countries");
+  let op = "";
   for (let key in arrayTable) {
     op += '<option value="' + key + '">' + key + "</option>";
   }
