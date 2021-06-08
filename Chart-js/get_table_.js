@@ -1,3 +1,5 @@
+'use strict';
+
 const https = require("https");
 
 let promise = new Promise((resolve, reject) => {
@@ -29,3 +31,4 @@ let promise = new Promise((resolve, reject) => {
       reject(new Error("Can't get data! " + err.message));
     });
 });
+
