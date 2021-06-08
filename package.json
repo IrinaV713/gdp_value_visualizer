@@ -18,3 +18,4 @@
     "lint": "eslint . --fix && prettier --write \"**/*.js\" \"**/*.json\""
   }
 }
+
