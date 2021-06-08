@@ -1,11 +1,41 @@
-let MARGIN = 60;
-let PADDING_Y = 20;
-let MAXWIDTH = screen.width * 0.8;
-let MAXHEIGHT = screen.height * 0.6;
-let point_radius = 4;
-let axis_width = 3;
-let grid_width = 0.5;
+'use strict';
 
+const margin = 60;
+const paddingY = 20;
+const maxWidth = screen.width * 0.8;
+const maxHeight = screen.height * 0.6;
+const pointRadius = 4;
+const axisWidth = 3;
+const gridWidth = 0.5;
+
+class MyChart {
+	constructor(canvasObject, width, height){
+		this.canvas = canvasObject;
+		this.ctx = this.canvas.getContext("2d");
+		this.canvas.width = width;
+		this.canvas.height = height;
+	}
+	
+	drawLine(startX, startY, endX, endY, width, color){
+		this.ctx.beginPath();
+		this.ctx.moveTo(startX, startY);
+		this.ctx.lineWidth = width;
+		this.ctx.lineTo(endX, endY);
+		this.ctx.strokeStyle = color;
+		this.ctx.stroke();
+	}
+
+	drawPoint(centerX, centerY, radius, color){
+		this.ctx.fillStyle = color;
+		this.ctx.beginPath();
+		this.ctx.moveTo(centerX, centerY);
+		this.ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+		this.ctx.closePath();
+		this.ctx.fill();
+	}	
+}
+
+//checking if promise is resolved or rejected
 document.addEventListener("DOMContentLoaded", function () {
   promise.then(
     (result) => {
@@ -17,41 +47,40 @@ document.addEventListener("DOMContentLoaded", function () {
   );
 });
 
+// adding options to drop-down list
 function outputToList() {
   const countriesSelect = document.getElementById("countries");
-  let op = "";
+  let listOption = "";
   for (let key in arrayTable) {
-    op += '<option value="' + key + '">' + key + "</option>";
+    listOption += '<option value="' + key + '">' + key + "</option>";
   }
-  countriesSelect.innerHTML = op;
+  countriesSelect.innerHTML = listOption;
 
   document.getElementById("selectArea").style = "";
 
-  let combo = document.getElementById("countries");
-  combo.onchange = function () {
+  let list = document.getElementById("countries");
+  list.onchange = function () {
     let popup = document.getElementById("popup");
     popup.style.display = "none";
 
-    countryData = arrayTable[combo.value];
-    let val = combo.value;
+    countryData = arrayTable[list.value];
+    let val = list.value;
     drawChart();
   };
 
-  combo.onchange();
+  list.onchange();
 }
 
+// setting up canvas and drawing chart
 function drawChart() {
-  var myCanvas = document.getElementById("chart");
-  myCanvas.width = MAXWIDTH;
-  myCanvas.height = MAXHEIGHT;
-  var ctx = myCanvas.getContext("2d");
+  let canvasElement = document.getElementById("chart");
+  const chart = new MyChart(canvasElement, maxWidth, maxHeight);
 
   let beginX = 0;
-  let beginY = MAXHEIGHT;
-  getCoordGrid(ctx, beginX, beginY);
+  let beginY = maxHeight;
+  getCoordGrid(chart, beginX, beginY);
 
-  myCanvas.addEventListener("mousedown", function (e) {
-    console.log("mousedown", e);
+  canvasElement.addEventListener("mousedown", function (e) {
     let num = getArrCoords(e.layerX, e.layerY);
     let popup = document.getElementById("popup");
     popup.innerHTML =
@@ -60,138 +89,121 @@ function drawChart() {
     popup.style.top = e.screenY + "px";
     popup.style.display = "block";
   });
+  
+  canvasElement.addEventListener("mouseleave", function (e) {
+    let popup = document.getElementById("popup");
+    popup.style.display = "none";
+  });
 }
 
-function drawLine(ctx, startX, startY, endX, endY, width, color) {
-  ctx.beginPath();
-  ctx.moveTo(startX, startY);
-  ctx.lineWidth = width;
-  ctx.lineTo(endX, endY);
-  ctx.strokeStyle = color;
-  ctx.stroke();
-}
-
-function drawPoint(ctx, centerX, centerY, radius, color) {
-  ctx.fillStyle = color;
-  ctx.beginPath();
-  ctx.moveTo(centerX, centerY);
-  ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-  ctx.closePath();
-  ctx.fill();
-}
-
-function getCoordGrid(ctx, startX, startY) {
+// drawing a coordinate grid and chart line
+function getCoordGrid(chart, startX, startY) {
   // draw axes
-  drawLine(
-    ctx,
-    startX + MARGIN,
-    startY - MARGIN,
-    MAXWIDTH - MARGIN,
-    startY - MARGIN,
-    axis_width,
+  chart.drawLine(
+    startX + margin,
+    startY - margin,
+    maxWidth - margin,
+    startY - margin,
+    axisWidth,
     "#4040a1"
   );
-  drawLine(
-    ctx,
-    startX + MARGIN,
-    startY - MARGIN,
-    startX + MARGIN,
-    MARGIN,
-    axis_width,
+  chart.drawLine(
+    startX + margin,
+    startY - margin,
+    startX + margin,
+    margin,
+    axisWidth,
     "#4040a1"
   );
 
   // look for max data value
-  let mv = 0;
+  let maxVal = 0;
   for (let i = 0; i < countryData.length; i++) {
-    if (mv < 1 * countryData[i][1]) mv = 1 * countryData[i][1];
+    if (maxVal < 1 * countryData[i][1]) maxVal = 1 * countryData[i][1];
   }
 
   // draw  Y grid
-  let kol = 5;
-  let deltaY = Math.round(mv / kol / 1000) * 1000;
-  let scaled_deltaY = ((MAXHEIGHT - 2 * MARGIN) * deltaY) / mv;
-  scaled_deltaY = Math.floor(scaled_deltaY);
-  for (let i = 1; i < kol; i++) {
-    drawLine(
-      ctx,
-      startX + MARGIN,
-      startY - MARGIN - i * scaled_deltaY,
-      MAXWIDTH - MARGIN,
-      startY - MARGIN - i * scaled_deltaY,
-      grid_width,
+  let countY = 5;
+  let deltaY = Math.round(maxVal / countY / 1000) * 1000;
+  let scaledDeltaY = ((maxHeight - 2 * margin) * deltaY) / maxVal;
+  scaledDeltaY = Math.floor(scaledDeltaY);
+  for (let i = 1; i < countY; i++) {
+    chart.drawLine(
+      startX + margin,
+      startY - margin - i * scaledDeltaY,
+      maxWidth - margin,
+      startY - margin - i * scaledDeltaY,
+      gridWidth,
       "#4040a1"
     );
-    drawLine(
-      ctx,
-      startX + MARGIN,
-      startY - MARGIN - i * scaled_deltaY,
-      startX + MARGIN - 8,
-      startY - MARGIN - i * scaled_deltaY,
-      axis_width,
+    chart.drawLine(
+      startX + margin,
+      startY - margin - i * scaledDeltaY,
+      startX + margin - 8,
+      startY - margin - i * scaledDeltaY,
+      axisWidth,
       "#4040a1"
     );
-    ctx.fillText(
+    chart.ctx.fillText(
       i * deltaY + "",
-      startX + MARGIN - 40,
-      startY - MARGIN - i * scaled_deltaY + 3
+      startX + margin - 40,
+      startY - margin - i * scaledDeltaY + 3
     );
   }
 
   // draw X grid
-  let kolX = countryData.length + 1;
-  let deltaX = (MAXWIDTH - 2 * MARGIN - startX) / kolX;
+  let countX = countryData.length + 1;
+  let deltaX = (maxWidth - 2 * margin - startX) / countX;
   for (let i = 0; i < countryData.length; i++) {
-    countryData[i][2] = startX + MARGIN + (i + 1) * deltaX;
-    drawLine(
-      ctx,
+    countryData[i][2] = startX + margin + (i + 1) * deltaX;
+    chart.drawLine(
       countryData[i][2],
-      startY - MARGIN,
+      startY - margin,
       countryData[i][2],
-      startY - MARGIN + 5,
-      axis_width,
+      startY - margin + 5,
+      axisWidth,
       "#4040a1"
     );
-    ctx.fillText(
+    chart.ctx.fillText(
       countryData[i][0] + "",
-      startX + MARGIN + (i + 1) * deltaX,
-      startY - MARGIN + 20
+      startX + margin + (i + 1) * deltaX,
+      startY - margin + 20
     );
   }
 
   // draw chart
-  let ylength = startY - 2 * MARGIN;
+  let yLength = startY - 2 * margin;
   for (let i = 0; i < countryData.length; i++) {
     if (i > 0) {
-      drawLine(
-        ctx,
-        startX + MARGIN + (i + 1) * deltaX,
-        startY - MARGIN - (countryData[i][1] * ylength) / mv,
-        startX + MARGIN + i * deltaX,
-        startY - MARGIN - (countryData[i - 1][1] * ylength) / mv,
-        axis_width - 1,
+      chart.drawLine(
+        startX + margin + (i + 1) * deltaX,
+        startY - margin - (countryData[i][1] * yLength) / maxVal,
+        startX + margin + i * deltaX,
+        startY - margin - (countryData[i - 1][1] * yLength) / maxVal,
+        axisWidth - 1,
         "#4040a1"
       );
     }
-    drawPoint(
-      ctx,
-      startX + MARGIN + (i + 1) * deltaX,
-      startY - MARGIN - (countryData[i][1] * ylength) / mv,
-      point_radius,
+    chart.drawPoint(
+      startX + margin + (i + 1) * deltaX,
+      startY - margin - (countryData[i][1] * yLength) / maxVal,
+      pointRadius,
       "#0000ff"
     );
   }
 }
 
+// transforming screen coordinates to corresponding information in array
 function getArrCoords(x, y) {
-  let minDist = 1000,
-    pos = 0;
+  let minDistance = 1000,
+      position = 0;
   for (let i = 0; i < countryData.length; i++) {
     let d = Math.abs(countryData[i][2] - x);
-    if (d < minDist) {
-      minDist = d;
-      pos = i;
+    if (d < minDistance) {
+      minDistance = d;
+      position = i;
     }
   }
-  return pos;
+  return position;
 }
+
