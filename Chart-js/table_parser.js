@@ -1,40 +1,41 @@
-function getArrayFromTable(q) {
-  let arr_table = [];
+'use strict';
 
-  var regexpYears = /class="time-series-table-heading">(.*?)<\/td>/g;
-  var matchYears;
-  var arr_years = [];
+//parsing a html table to array structure
+function getArrayFromTable(q) {
+  let arrTable = [];
+
+  let regexpYears = /class="time-series-table-heading">(.*?)<\/td>/g;
+  let matchYears;
+  let arrYears = [];
 
   while ((matchYears = regexpYears.exec(q))) {
-    arr_years.push(matchYears[1]);
+    arrYears.push(matchYears[1]);
   }
 
-  var regexpBody = /<tbody>(.*?)<\/tbody>/s;
+  let regexpBody = /<tbody>(.*?)<\/tbody>/s;
   let body = regexpBody.exec(q);
 
-  var regexpTableString = /<tr>(.*?)<\/tr>/gs;
-  var matchString;
+  let regexpTableString = /<tr>(.*?)<\/tr>/gs;
+  let matchString;
 
-  let k = 0;
   while ((matchString = regexpTableString.exec(body[1]))) {
     let currentString = matchString[1];
 
-    var country =
+    let country =
       /<td class="fixed-header time-series-table-country">(.*?)<\/td>/s.exec(
         currentString
       );
-    var regexpValue = /<td class="time-series-table-value">(.*?)<\/td>/g;
-    var matchValue;
+    let regexpValue = /<td class="time-series-table-value">(.*?)<\/td>/g;
+    let matchValue;
 
     let i = 0;
     while ((matchValue = regexpValue.exec(currentString))) {
-      if (arr_table[country[1]] == undefined) arr_table[country[1]] = [];
-      arr_table[country[1]].push([arr_years[i], matchValue[1]]);
+      if (arrTable[country[1]] == undefined) arrTable[country[1]] = [];
+      arrTable[country[1]].push([arrYears[i], matchValue[1]]);
       i++;
     }
-    k++;
   }
-  arr_table["count"] = k;
-
-  return arr_table;
+  
+  return arrTable;
 }
+
