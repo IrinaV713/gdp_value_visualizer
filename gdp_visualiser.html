@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
   <head>
     <link type="text/css" rel="stylesheet" href="styles.css" />
     <script type="text/javascript" src="table_parser.js"></script>
@@ -8,24 +9,36 @@
     <script type="text/javascript">
       let arrayTable = [];
       let countryData = [];
-
-      var ngui = require("nw.gui"); // Load native UI library
-      var nwin = ngui.Window.get(); // Get the current window
+      
+      // loading native UI library and getting current window
+      let ngui = require("nw.gui"); 
+      let nwin = ngui.Window.get(); 
       onload = function () {
         nwin.show();
         nwin.maximize();
       };
     </script>
   </head>
+  
   <body>
+    <!--page title-->
     <p id="idTitle">Gross domestic product(GDP) per capita in USD</p>
+	
+    <!--choosing country-->
     <div id="selectArea" style="display: none">
-      <p id="choice">Country:</p>
+      <p class="choice">Country:</p>
       <select id="countries"></select>
     </div>
+	
+	  <p class="choice">Click on chart vertex to see exact GDP value in the corresponding year.</p>
+	
+    <!--area for canvas-->
     <div class="chartArea">
       <canvas id="chart"></canvas>
     </div>
+	
+    <!--label to show information-->
     <div id="popup" style="display: none"></div>
+	
   </body>
 </html>
