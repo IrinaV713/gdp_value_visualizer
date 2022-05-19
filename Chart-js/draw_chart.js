@@ -1,6 +1,6 @@
 'use strict';
 
-const margin = 60;
+const margin = 50;
 const paddingY = 20;
 const maxWidth = screen.width * 0.8;
 const maxHeight = screen.height * 0.6;
